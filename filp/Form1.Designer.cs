@@ -13,7 +13,11 @@ namespace filp
 
         private void InitializeComponent()
         {
-            this.panelTemplate    = new Panel();
+            this.tabControl       = new TabControl();
+            this.tabMain          = new TabPage();
+            this.tabAttachments   = new TabPage();
+
+            this.grpTemplate      = new GroupBox();
             this.lblTemplatePath  = new Label();
             this.txtTemplatePath  = new TextBox();
             this.btnBrowseTemplate = new Button();
@@ -38,110 +42,202 @@ namespace filp
             this.lblLetterBody    = new Label();
             this.txtLetterBody    = new TextBox();
 
-            this.grpSender    = new GroupBox();
-            this.lblSenderPost = new Label();
-            this.txtSenderPost = new TextBox();
-            this.lblSenderName = new Label();
-            this.txtSenderName = new TextBox();
+            this.grpSender        = new GroupBox();
+            this.lblSenderPost    = new Label();
+            this.txtSenderPost    = new TextBox();
+            this.lblSenderName    = new Label();
+            this.txtSenderName    = new TextBox();
 
-            this.btnFillDefaults = new Button();
-            this.btnGenerate     = new Button();
-            this.lblStatus       = new Label();
+            this.lblAttList       = new Label();
+            this.lstAttachments   = new ListBox();
+            this.btnAddAtt        = new Button();
+            this.btnRemoveAtt     = new Button();
+            this.btnAttUp         = new Button();
+            this.btnAttDown       = new Button();
+
+            this.grpAttEdit       = new GroupBox();
+            this.lblAttTitle      = new Label();
+            this.txtAttTitle      = new TextBox();
+            this.lblAttPages      = new Label();
+            this.numAttPages      = new NumericUpDown();
+            this.lblAttText       = new Label();
+            this.txtAttText       = new TextBox();
+
+            this.pnlBottom        = new Panel();
+            this.btnFillDefaults  = new Button();
+            this.btnGenerate      = new Button();
+            this.lblStatus        = new Label();
 
             this.SuspendLayout();
 
-            // Form
             this.Text = "Генератор деловых писем";
             this.Size = new Size(680, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
 
-            // panelTemplate
-            this.panelTemplate.Dock = DockStyle.Top;
-            this.panelTemplate.Height = 46;
+            this.pnlBottom.Dock = DockStyle.Bottom;
+            this.pnlBottom.Height = 44;
 
-            this.lblTemplatePath.Text = "Файл шаблона:";
-            this.lblTemplatePath.AutoSize = true;
-            this.lblTemplatePath.Location = new Point(8, 15);
-
-            this.txtTemplatePath.Location = new Point(100, 12);
-            this.txtTemplatePath.Width = 450;
-            this.txtTemplatePath.ReadOnly = true;
-
-            this.btnBrowseTemplate.Text = "Обзор...";
-            this.btnBrowseTemplate.Location = new Point(558, 11);
-            this.btnBrowseTemplate.Size = new Size(100, 23);
-            this.btnBrowseTemplate.Click += new EventHandler(this.btnBrowseTemplate_Click);
-
-            this.panelTemplate.Controls.AddRange(new Control[] {
-                this.lblTemplatePath, this.txtTemplatePath, this.btnBrowseTemplate
-            });
-
-            // grpRecipient
-            this.grpRecipient.Text = "Получатель";
-            this.grpRecipient.Location = new Point(8, 52);
-            this.grpRecipient.Size = new Size(648, 158);
-
-            AddField(this.grpRecipient, this.lblRecipientPost, "Должность:",       this.txtRecipientPost, 22);
-            AddField(this.grpRecipient, this.lblRecipientOrg,  "Организация:",      this.txtRecipientOrg,  52);
-            AddField(this.grpRecipient, this.lblRecipientName, "ФИО (дат. пад.):", this.txtRecipientName, 82);
-            AddField(this.grpRecipient, this.lblGreetingName,  "Обращение:",        this.txtGreetingName,  112);
-
-            // grpLetter
-            this.grpLetter.Text = "Письмо";
-            this.grpLetter.Location = new Point(8, 218);
-            this.grpLetter.Size = new Size(648, 262);
-
-            AddField(this.grpLetter, this.lblDate,         "Дата:",  this.txtDate,         22);
-            AddField(this.grpLetter, this.lblLetterNum,    "Номер:", this.txtLetterNum,     52);
-            AddField(this.grpLetter, this.lblLetterSubject,"Тема:",  this.txtLetterSubject, 82);
-
-            this.lblLetterBody.Text = "Текст:";
-            this.lblLetterBody.AutoSize = true;
-            this.lblLetterBody.Location = new Point(10, 117);
-
-            this.txtLetterBody.Location = new Point(160, 114);
-            this.txtLetterBody.Size = new Size(478, 134);
-            this.txtLetterBody.Multiline = true;
-            this.txtLetterBody.ScrollBars = ScrollBars.Vertical;
-            this.grpLetter.Controls.AddRange(new Control[] { this.lblLetterBody, this.txtLetterBody });
-
-            // grpSender
-            this.grpSender.Text = "Отправитель";
-            this.grpSender.Location = new Point(8, 488);
-            this.grpSender.Size = new Size(648, 92);
-
-            AddField(this.grpSender, this.lblSenderPost, "Должность:", this.txtSenderPost, 22);
-            AddField(this.grpSender, this.lblSenderName, "ФИО:",       this.txtSenderName, 52);
-
-            // btnFillDefaults
             this.btnFillDefaults.Text = "Заполнить образцом";
-            this.btnFillDefaults.Location = new Point(8, 592);
-            this.btnFillDefaults.Size = new Size(150, 26);
+            this.btnFillDefaults.Location = new Point(8, 9);
+            this.btnFillDefaults.Size = new Size(148, 26);
             this.btnFillDefaults.Click += new EventHandler(this.btnFillDefaults_Click);
 
-            // btnGenerate
             this.btnGenerate.Text = "Создать письмо";
-            this.btnGenerate.Location = new Point(168, 592);
+            this.btnGenerate.Location = new Point(164, 9);
             this.btnGenerate.Size = new Size(130, 26);
             this.btnGenerate.Click += new EventHandler(this.btnGenerate_Click);
 
-            // lblStatus
-            this.lblStatus.Location = new Point(308, 596);
-            this.lblStatus.Size = new Size(350, 18);
+            this.lblStatus.Location = new Point(302, 13);
+            this.lblStatus.Size = new Size(360, 18);
             this.lblStatus.AutoSize = false;
-            this.lblStatus.Text = "";
 
-            this.Controls.AddRange(new Control[] {
-                this.panelTemplate,
-                this.grpRecipient,
-                this.grpLetter,
-                this.grpSender,
-                this.btnFillDefaults,
-                this.btnGenerate,
-                this.lblStatus
+            this.pnlBottom.Controls.AddRange(new Control[] {
+                this.btnFillDefaults, this.btnGenerate, this.lblStatus
             });
+
+            this.tabControl.Dock = DockStyle.Fill;
+            this.tabControl.Controls.AddRange(new TabPage[] {
+                this.tabMain, this.tabAttachments
+            });
+
+            this.tabMain.Text = "Основное";
+            this.tabMain.Padding = new Padding(4);
+
+            this.tabAttachments.Text = "Приложения";
+            this.tabAttachments.Padding = new Padding(4);
+
+            this.grpTemplate.Text = "Шаблон";
+            this.grpTemplate.Location = new Point(4, 4);
+            this.grpTemplate.Size = new Size(648, 48);
+
+            this.lblTemplatePath.Text = "Файл:";
+            this.lblTemplatePath.AutoSize = true;
+            this.lblTemplatePath.Location = new Point(8, 18);
+
+            this.txtTemplatePath.Location = new Point(48, 15);
+            this.txtTemplatePath.Width = 490;
+            this.txtTemplatePath.ReadOnly = true;
+
+            this.btnBrowseTemplate.Text = "Обзор...";
+            this.btnBrowseTemplate.Location = new Point(546, 14);
+            this.btnBrowseTemplate.Size = new Size(92, 23);
+            this.btnBrowseTemplate.Click += new EventHandler(this.btnBrowseTemplate_Click);
+
+            this.grpTemplate.Controls.AddRange(new Control[] {
+                this.lblTemplatePath, this.txtTemplatePath, this.btnBrowseTemplate
+            });
+
+            this.grpRecipient.Text = "Получатель";
+            this.grpRecipient.Location = new Point(4, 58);
+            this.grpRecipient.Size = new Size(648, 150);
+
+            AddField(grpRecipient, lblRecipientPost, "Должность:",       txtRecipientPost, 20);
+            AddField(grpRecipient, lblRecipientOrg,  "Организация:",      txtRecipientOrg,  50);
+            AddField(grpRecipient, lblRecipientName, "ФИО (дат. пад.):", txtRecipientName, 80);
+            AddField(grpRecipient, lblGreetingName,  "Обращение:",        txtGreetingName,  110);
+
+            this.grpLetter.Text = "Письмо";
+            this.grpLetter.Location = new Point(4, 214);
+            this.grpLetter.Size = new Size(648, 254);
+
+            AddField(grpLetter, lblDate,         "Дата:",  txtDate,         20);
+            AddField(grpLetter, lblLetterNum,    "Номер:", txtLetterNum,     50);
+            AddField(grpLetter, lblLetterSubject,"Тема:",  txtLetterSubject, 80);
+
+            this.lblLetterBody.Text = "Текст:";
+            this.lblLetterBody.AutoSize = true;
+            this.lblLetterBody.Location = new Point(10, 115);
+
+            this.txtLetterBody.Location = new Point(155, 112);
+            this.txtLetterBody.Size = new Size(483, 130);
+            this.txtLetterBody.Multiline = true;
+            this.txtLetterBody.ScrollBars = ScrollBars.Vertical;
+            this.grpLetter.Controls.AddRange(new Control[] { lblLetterBody, txtLetterBody });
+
+            this.grpSender.Text = "Отправитель";
+            this.grpSender.Location = new Point(4, 474);
+            this.grpSender.Size = new Size(648, 82);
+
+            AddField(grpSender, lblSenderPost, "Должность:", txtSenderPost, 20);
+            AddField(grpSender, lblSenderName, "ФИО:",       txtSenderName, 50);
+
+            this.tabMain.Controls.AddRange(new Control[] {
+                grpTemplate, grpRecipient, grpLetter, grpSender
+            });
+
+            this.lblAttList.Text = "Список приложений:";
+            this.lblAttList.AutoSize = true;
+            this.lblAttList.Location = new Point(8, 8);
+
+            this.lstAttachments.Location = new Point(8, 26);
+            this.lstAttachments.Size = new Size(490, 148);
+            this.lstAttachments.SelectedIndexChanged += new EventHandler(this.lstAttachments_SelectedIndexChanged);
+
+            this.btnAddAtt.Text = "Добавить";
+            this.btnAddAtt.Location = new Point(508, 26);
+            this.btnAddAtt.Size = new Size(130, 26);
+            this.btnAddAtt.Click += new EventHandler(this.btnAddAtt_Click);
+
+            this.btnRemoveAtt.Text = "Удалить";
+            this.btnRemoveAtt.Location = new Point(508, 58);
+            this.btnRemoveAtt.Size = new Size(130, 26);
+            this.btnRemoveAtt.Click += new EventHandler(this.btnRemoveAtt_Click);
+
+            this.btnAttUp.Text = "↑ Вверх";
+            this.btnAttUp.Location = new Point(508, 90);
+            this.btnAttUp.Size = new Size(130, 26);
+            this.btnAttUp.Click += new EventHandler(this.btnAttUp_Click);
+
+            this.btnAttDown.Text = "↓ Вниз";
+            this.btnAttDown.Location = new Point(508, 122);
+            this.btnAttDown.Size = new Size(130, 26);
+            this.btnAttDown.Click += new EventHandler(this.btnAttDown_Click);
+
+            this.grpAttEdit.Text = "Редактирование";
+            this.grpAttEdit.Location = new Point(8, 184);
+            this.grpAttEdit.Size = new Size(630, 360);
+
+            this.lblAttTitle.Text = "Заголовок:";
+            this.lblAttTitle.AutoSize = true;
+            this.lblAttTitle.Location = new Point(10, 26);
+
+            this.txtAttTitle.Location = new Point(155, 23);
+            this.txtAttTitle.Width = 460;
+
+            this.lblAttPages.Text = "Страниц:";
+            this.lblAttPages.AutoSize = true;
+            this.lblAttPages.Location = new Point(10, 58);
+
+            this.numAttPages.Location = new Point(155, 55);
+            this.numAttPages.Width = 60;
+            this.numAttPages.Minimum = 1;
+            this.numAttPages.Maximum = 999;
+            this.numAttPages.Value = 1;
+
+            this.lblAttText.Text = "Текст:";
+            this.lblAttText.AutoSize = true;
+            this.lblAttText.Location = new Point(10, 92);
+
+            this.txtAttText.Location = new Point(155, 89);
+            this.txtAttText.Size = new Size(460, 256);
+            this.txtAttText.Multiline = true;
+            this.txtAttText.ScrollBars = ScrollBars.Vertical;
+
+            this.grpAttEdit.Controls.AddRange(new Control[] {
+                lblAttTitle, txtAttTitle,
+                lblAttPages, numAttPages,
+                lblAttText,  txtAttText
+            });
+
+            this.tabAttachments.Controls.AddRange(new Control[] {
+                lblAttList, lstAttachments,
+                btnAddAtt, btnRemoveAtt, btnAttUp, btnAttDown,
+                grpAttEdit
+            });
+
+            this.Controls.AddRange(new Control[] { pnlBottom, tabControl });
 
             this.ResumeLayout(false);
         }
@@ -151,46 +247,64 @@ namespace filp
             lbl.Text = labelText;
             lbl.AutoSize = true;
             lbl.Location = new Point(10, y + 3);
-
-            txt.Location = new Point(160, y);
-            txt.Width = 478;
-
+            txt.Location = new Point(155, y);
+            txt.Width = 483;
             parent.Controls.AddRange(new Control[] { lbl, txt });
         }
 
-        private Panel    panelTemplate;
-        private Label    lblTemplatePath;
-        private TextBox  txtTemplatePath;
-        private Button   btnBrowseTemplate;
+        private TabControl  tabControl;
+        private TabPage     tabMain;
+        private TabPage     tabAttachments;
 
-        private GroupBox grpRecipient;
-        private Label    lblRecipientPost;
-        private TextBox  txtRecipientPost;
-        private Label    lblRecipientOrg;
-        private TextBox  txtRecipientOrg;
-        private Label    lblRecipientName;
-        private TextBox  txtRecipientName;
-        private Label    lblGreetingName;
-        private TextBox  txtGreetingName;
+        private GroupBox    grpTemplate;
+        private Label       lblTemplatePath;
+        private TextBox     txtTemplatePath;
+        private Button      btnBrowseTemplate;
 
-        private GroupBox grpLetter;
-        private Label    lblDate;
-        private TextBox  txtDate;
-        private Label    lblLetterNum;
-        private TextBox  txtLetterNum;
-        private Label    lblLetterSubject;
-        private TextBox  txtLetterSubject;
-        private Label    lblLetterBody;
-        private TextBox  txtLetterBody;
+        private GroupBox    grpRecipient;
+        private Label       lblRecipientPost;
+        private TextBox     txtRecipientPost;
+        private Label       lblRecipientOrg;
+        private TextBox     txtRecipientOrg;
+        private Label       lblRecipientName;
+        private TextBox     txtRecipientName;
+        private Label       lblGreetingName;
+        private TextBox     txtGreetingName;
 
-        private GroupBox grpSender;
-        private Label    lblSenderPost;
-        private TextBox  txtSenderPost;
-        private Label    lblSenderName;
-        private TextBox  txtSenderName;
+        private GroupBox    grpLetter;
+        private Label       lblDate;
+        private TextBox     txtDate;
+        private Label       lblLetterNum;
+        private TextBox     txtLetterNum;
+        private Label       lblLetterSubject;
+        private TextBox     txtLetterSubject;
+        private Label       lblLetterBody;
+        private TextBox     txtLetterBody;
 
-        private Button btnFillDefaults;
-        private Button btnGenerate;
-        private Label  lblStatus;
+        private GroupBox    grpSender;
+        private Label       lblSenderPost;
+        private TextBox     txtSenderPost;
+        private Label       lblSenderName;
+        private TextBox     txtSenderName;
+
+        private Label          lblAttList;
+        private ListBox        lstAttachments;
+        private Button         btnAddAtt;
+        private Button         btnRemoveAtt;
+        private Button         btnAttUp;
+        private Button         btnAttDown;
+
+        private GroupBox       grpAttEdit;
+        private Label          lblAttTitle;
+        private TextBox        txtAttTitle;
+        private Label          lblAttPages;
+        private NumericUpDown  numAttPages;
+        private Label          lblAttText;
+        private TextBox        txtAttText;
+
+        private Panel   pnlBottom;
+        private Button  btnFillDefaults;
+        private Button  btnGenerate;
+        private Label   lblStatus;
     }
 }
