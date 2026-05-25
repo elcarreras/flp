@@ -68,28 +68,32 @@ namespace filp
             this.btnGenerate      = new Button();
             this.lblStatus        = new Label();
 
+            this.pnlPreview       = new Panel();
+            this.lblPreviewTitle  = new Label();
+            this.rtbPreview       = new RichTextBox();
+
             this.SuspendLayout();
 
             this.Text = "Генератор деловых писем";
-            this.Size = new Size(680, 700);
+            this.Size = new Size(1130, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
 
             this.pnlBottom.Dock = DockStyle.Bottom;
-            this.pnlBottom.Height = 44;
+            this.pnlBottom.Height = 52;
 
             this.btnFillDefaults.Text = "Заполнить образцом";
-            this.btnFillDefaults.Location = new Point(8, 9);
-            this.btnFillDefaults.Size = new Size(148, 26);
+            this.btnFillDefaults.Location = new Point(12, 12);
+            this.btnFillDefaults.Size = new Size(148, 28);
             this.btnFillDefaults.Click += new EventHandler(this.btnFillDefaults_Click);
 
             this.btnGenerate.Text = "Создать письмо";
-            this.btnGenerate.Location = new Point(164, 9);
-            this.btnGenerate.Size = new Size(130, 26);
+            this.btnGenerate.Location = new Point(168, 12);
+            this.btnGenerate.Size = new Size(140, 28);
             this.btnGenerate.Click += new EventHandler(this.btnGenerate_Click);
 
-            this.lblStatus.Location = new Point(302, 13);
+            this.lblStatus.Location = new Point(320, 17);
             this.lblStatus.Size = new Size(360, 18);
             this.lblStatus.AutoSize = false;
 
@@ -133,18 +137,18 @@ namespace filp
             this.grpRecipient.Location = new Point(4, 58);
             this.grpRecipient.Size = new Size(648, 150);
 
-            AddField(grpRecipient, lblRecipientPost, "Должность:",       txtRecipientPost, 20);
-            AddField(grpRecipient, lblRecipientOrg,  "Организация:",      txtRecipientOrg,  50);
-            AddField(grpRecipient, lblRecipientName, "ФИО (дат. пад.):", txtRecipientName, 80);
-            AddField(grpRecipient, lblGreetingName,  "Обращение:",        txtGreetingName,  110);
+            AddField(grpRecipient, lblRecipientPost, "Должность:",       txtRecipientPost, 24);
+            AddField(grpRecipient, lblRecipientOrg,  "Организация:",      txtRecipientOrg,  54);
+            AddField(grpRecipient, lblRecipientName, "ФИО (дат. пад.):", txtRecipientName, 84);
+            AddField(grpRecipient, lblGreetingName,  "Обращение:",        txtGreetingName,  114);
 
             this.grpLetter.Text = "Письмо";
             this.grpLetter.Location = new Point(4, 214);
             this.grpLetter.Size = new Size(648, 254);
 
-            AddField(grpLetter, lblDate,         "Дата:",  txtDate,         20);
-            AddField(grpLetter, lblLetterNum,    "Номер:", txtLetterNum,     50);
-            AddField(grpLetter, lblLetterSubject,"Тема:",  txtLetterSubject, 80);
+            AddField(grpLetter, lblDate,         "Дата:",  txtDate,         24);
+            AddField(grpLetter, lblLetterNum,    "Номер:", txtLetterNum,     54);
+            AddField(grpLetter, lblLetterSubject,"Тема:",  txtLetterSubject, 84);
 
             this.lblLetterBody.Text = "Текст:";
             this.lblLetterBody.AutoSize = true;
@@ -158,10 +162,10 @@ namespace filp
 
             this.grpSender.Text = "Отправитель";
             this.grpSender.Location = new Point(4, 474);
-            this.grpSender.Size = new Size(648, 82);
+            this.grpSender.Size = new Size(648, 84);
 
-            AddField(grpSender, lblSenderPost, "Должность:", txtSenderPost, 20);
-            AddField(grpSender, lblSenderName, "ФИО:",       txtSenderName, 50);
+            AddField(grpSender, lblSenderPost, "Должность:", txtSenderPost, 24);
+            AddField(grpSender, lblSenderName, "ФИО:",       txtSenderName, 54);
 
             this.tabMain.Controls.AddRange(new Control[] {
                 grpTemplate, grpRecipient, grpLetter, grpSender
@@ -237,7 +241,26 @@ namespace filp
                 grpAttEdit
             });
 
-            this.Controls.AddRange(new Control[] { pnlBottom, tabControl });
+            this.lblPreviewTitle.Text      = "Предпросмотр письма";
+            this.lblPreviewTitle.Dock      = DockStyle.Top;
+            this.lblPreviewTitle.Height    = 22;
+            this.lblPreviewTitle.TextAlign = ContentAlignment.MiddleCenter;
+            this.lblPreviewTitle.Font      = new Font(this.Font, FontStyle.Bold);
+
+            this.rtbPreview.Dock        = DockStyle.Fill;
+            this.rtbPreview.ReadOnly    = true;
+            this.rtbPreview.BackColor   = SystemColors.Window;
+            this.rtbPreview.Font        = new Font("Times New Roman", 9.5f);
+            this.rtbPreview.ScrollBars  = RichTextBoxScrollBars.Vertical;
+            this.rtbPreview.BorderStyle = BorderStyle.None;
+            this.rtbPreview.WordWrap    = true;
+
+            this.pnlPreview.Dock    = DockStyle.Right;
+            this.pnlPreview.Width   = 420;
+            this.pnlPreview.Padding = new Padding(6, 4, 6, 4);
+            this.pnlPreview.Controls.AddRange(new Control[] { this.rtbPreview, this.lblPreviewTitle });
+
+            this.Controls.AddRange(new Control[] { pnlBottom, pnlPreview, tabControl });
 
             this.ResumeLayout(false);
         }
@@ -306,5 +329,9 @@ namespace filp
         private Button  btnFillDefaults;
         private Button  btnGenerate;
         private Label   lblStatus;
+
+        private Panel       pnlPreview;
+        private Label       lblPreviewTitle;
+        private RichTextBox rtbPreview;
     }
 }
