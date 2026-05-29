@@ -70,7 +70,7 @@ namespace filp
 
             this.pnlPreview       = new Panel();
             this.lblPreviewTitle  = new Label();
-            this.rtbPreview       = new RichTextBox();
+            this.wbPreview        = new Microsoft.Web.WebView2.WinForms.WebView2();
 
             this.SuspendLayout();
 
@@ -247,18 +247,13 @@ namespace filp
             this.lblPreviewTitle.TextAlign = ContentAlignment.MiddleCenter;
             this.lblPreviewTitle.Font      = new Font(this.Font, FontStyle.Bold);
 
-            this.rtbPreview.Dock        = DockStyle.Fill;
-            this.rtbPreview.ReadOnly    = true;
-            this.rtbPreview.BackColor   = SystemColors.Window;
-            this.rtbPreview.Font        = new Font("Times New Roman", 9.5f);
-            this.rtbPreview.ScrollBars  = RichTextBoxScrollBars.Vertical;
-            this.rtbPreview.BorderStyle = BorderStyle.None;
-            this.rtbPreview.WordWrap    = true;
+            this.wbPreview.Dock = DockStyle.Fill;
 
             this.pnlPreview.Dock    = DockStyle.Right;
             this.pnlPreview.Width   = 420;
-            this.pnlPreview.Padding = new Padding(6, 4, 6, 4);
-            this.pnlPreview.Controls.AddRange(new Control[] { this.rtbPreview, this.lblPreviewTitle });
+            this.pnlPreview.Padding = new Padding(0);
+
+            this.pnlPreview.Controls.AddRange(new Control[] { this.wbPreview, this.lblPreviewTitle });
 
             this.Controls.AddRange(new Control[] { pnlBottom, pnlPreview, tabControl });
 
@@ -332,6 +327,7 @@ namespace filp
 
         private Panel       pnlPreview;
         private Label       lblPreviewTitle;
-        private RichTextBox rtbPreview;
+        private Microsoft.Web.WebView2.WinForms.WebView2  wbPreview;
+
     }
 }

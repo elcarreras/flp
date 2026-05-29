@@ -25,6 +25,9 @@ namespace filp
         private int  _currentAttIndex = -1;
         private bool _loadingAtt      = false;
 
+        private readonly System.Windows.Forms.Timer _previewTimer = new() { Interval = 800 };
+        private volatile bool _previewRunning = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -37,13 +40,38 @@ namespace filp
             UpdateAttachmentButtons();
             ApplyFlatTheme();
 
+            _previewTimer.Tick += (_, _) => { _previewTimer.Stop(); DoUpdatePreview(); };
+
             foreach (var tb in new[] {
                 txtDate, txtLetterNum, txtRecipientPost, txtRecipientOrg,
                 txtRecipientName, txtGreetingName, txtLetterSubject, txtLetterBody,
                 txtSenderPost, txtSenderName })
                 tb.TextChanged += (_, _) => UpdatePreview();
 
-            UpdatePreview();
+            this.Load += async (_, _) =>
+            {
+                try
+                {
+                    lblStatus.Text = "Инициализация просмотрщика...";
+                    var env = await Microsoft.Web.WebView2.Core.CoreWebView2Environment.CreateAsync(
+                        null, Path.Combine(Path.GetTempPath(), "filp_webview2"));
+                    await wbPreview.EnsureCoreWebView2Async(env);
+                    lblStatus.Text = "";
+                    if (File.Exists(txtTemplatePath.Text))
+                        DoUpdatePreview();
+                }
+                catch (Exception ex)
+                {
+                    lblStatus.Text = "WebView2 недоступен: " + ex.Message;
+                    lblStatus.ForeColor = D.Color.OrangeRed;
+                }
+            };
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            _previewTimer.Dispose();
         }
 
         // обработчики
@@ -55,7 +83,10 @@ namespace filp
                 Title  = "Выберите шаблон письма"
             };
             if (dlg.ShowDialog() == DialogResult.OK)
+            {
                 txtTemplatePath.Text = dlg.FileName;
+                UpdatePreview();
+            }
         }
 
         private void btnFillDefaults_Click(object sender, EventArgs e)
@@ -285,59 +316,106 @@ namespace filp
 
         private void UpdatePreview()
         {
-            var sb = new System.Text.StringBuilder();
+            _previewTimer.Stop();
+            _previewTimer.Start();
+        }
 
-            string recipient = string.Join("\n",
-                new[] { txtRecipientPost.Text, txtRecipientOrg.Text, txtRecipientName.Text }
-                .Where(s => !string.IsNullOrWhiteSpace(s)));
-            foreach (var line in recipient.Split('\n', StringSplitOptions.RemoveEmptyEntries))
-                sb.AppendLine(line.PadLeft(52));
-
-            sb.AppendLine();
-
-            string num  = txtLetterNum.Text.Trim();
-            string date = txtDate.Text.Trim();
-            if (!string.IsNullOrWhiteSpace(num) || !string.IsNullOrWhiteSpace(date))
-                sb.AppendLine($"Исх. № {num}  от  {date}");
-
-            sb.AppendLine();
-
-            if (!string.IsNullOrWhiteSpace(txtLetterSubject.Text))
-                sb.AppendLine("    " + txtLetterSubject.Text.ToUpper());
-
-            sb.AppendLine();
-
-            if (!string.IsNullOrWhiteSpace(txtGreetingName.Text))
-                sb.AppendLine($"    Уважаемый {txtGreetingName.Text}!");
-
-            sb.AppendLine();
-
-            if (!string.IsNullOrWhiteSpace(txtLetterBody.Text))
-                sb.AppendLine(txtLetterBody.Text);
-
-            if (_attachments.Count > 0)
+        private void DoUpdatePreview()
+        {
+            if (_previewRunning)
             {
-                sb.AppendLine();
-                sb.AppendLine(_attachments.Count == 1 ? "Приложение:" : "Приложения:");
-                for (int i = 0; i < _attachments.Count; i++)
+                _previewTimer.Start();
+                return;
+            }
+            if (!File.Exists(txtTemplatePath.Text)) return;
+            if (wbPreview.CoreWebView2 == null) return;
+
+            _previewRunning = true;
+
+            var replacements = new Dictionary<string, string>
+            {
+                ["{DATE}"]           = txtDate.Text,
+                ["{LETTER_NUM}"]     = txtLetterNum.Text,
+                ["{RECIPIENT_POST}"] = txtRecipientPost.Text,
+                ["{RECIPIENT_ORG}"]  = txtRecipientOrg.Text,
+                ["{RECIPIENT_NAME}"] = txtRecipientName.Text,
+                ["{GREETING_NAME}"]  = txtGreetingName.Text,
+                ["{LETTER_SUBJECT}"] = txtLetterSubject.Text,
+                ["{LETTER_BODY}"]    = txtLetterBody.Text,
+                ["{SENDER_POST}"]    = txtSenderPost.Text,
+                ["{SENDER_NAME}"]    = txtSenderName.Text,
+            };
+
+            var previewAtts = _attachments
+                .Select((a, i) => i == _currentAttIndex
+                    ? new Attachment { Title = txtAttTitle.Text, Pages = (int)numAttPages.Value, Text = txtAttText.Text }
+                    : new Attachment { Title = a.Title, Pages = a.Pages, Text = a.Text })
+                .ToList();
+
+            string template = txtTemplatePath.Text;
+            string tmpDocx  = Path.Combine(Path.GetTempPath(), "_filp_preview.docx");
+            string tmpPdf   = Path.Combine(Path.GetTempPath(), "_filp_preview.pdf");
+
+            wbPreview.CoreWebView2.Navigate("about:blank");
+            lblStatus.Text      = "Генерация предпросмотра...";
+            lblStatus.ForeColor = CMuted;
+
+            var thread = new Thread(() =>
+            {
+                try
                 {
-                    var att = _attachments[i];
-                    string pages = att.Pages > 0 ? $" на {att.Pages} л." : "";
-                    sb.AppendLine(_attachments.Count == 1
-                        ? att.Title + pages
-                        : $"{i + 1}. {att.Title}{pages}");
+                    File.Copy(template, tmpDocx, overwrite: true);
+                    GenerateLetter(tmpDocx, replacements, previewAtts);
+                    ConvertDocxToPdf(tmpDocx, tmpPdf);
+                    Invoke(() =>
+                    {
+                        wbPreview.CoreWebView2.Navigate(
+                            "file:///" + tmpPdf.Replace('\\', '/'));
+                        lblStatus.Text = "";
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Invoke(() =>
+                    {
+                        lblStatus.Text      = "Ошибка предпросмотра: " + ex.Message;
+                        lblStatus.ForeColor = D.Color.OrangeRed;
+                    });
+                }
+                finally { _previewRunning = false; }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.IsBackground = true;
+            thread.Start();
+        }
+
+        private static void ConvertDocxToPdf(string docxPath, string pdfPath)
+        {
+            var wordType = Type.GetTypeFromProgID("Word.Application")
+                ?? throw new InvalidOperationException("Microsoft Word не найден в системе.");
+
+            dynamic wordApp = Activator.CreateInstance(wordType)!;
+            wordApp.Visible = false;
+            try
+            {
+                dynamic doc = wordApp.Documents.Open(docxPath, ReadOnly: true, AddToRecentFiles: false);
+                try
+                {
+                    doc.ExportAsFixedFormat(pdfPath, 17); // 17 = wdExportFormatPDF
+                }
+                finally
+                {
+                    doc.Close(false);
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(doc);
                 }
             }
-
-            sb.AppendLine();
-            sb.AppendLine(new string('─', 48));
-
-            string post   = txtSenderPost.Text.Trim();
-            string sender = txtSenderName.Text.Trim();
-            if (!string.IsNullOrWhiteSpace(post) || !string.IsNullOrWhiteSpace(sender))
-                sb.AppendLine($"{post}     Подпись     {sender}");
-
-            rtbPreview.Text = sb.ToString();
+            finally
+            {
+                wordApp.Quit(false);
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(wordApp);
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
         }
 
         private bool ValidateFields()
@@ -540,9 +618,6 @@ namespace filp
             pnlPreview.BackColor = CWhite;
             lblPreviewTitle.Font = new D.Font("Segoe UI", 8f, D.FontStyle.Bold);
             lblPreviewTitle.ForeColor = CMuted;
-            rtbPreview.BackColor = CWhite;
-            rtbPreview.ForeColor = CDark;
-            rtbPreview.Font = new D.Font("Times New Roman", 10f);
 
             tabMain.BackColor = CBg;
             tabAttachments.BackColor = CBg;
